@@ -29,7 +29,8 @@ public:
     void push(T&& r_value);
     T&& pop();
 
-    // TODO indexing
+    T& operator [](std::size_t index);
+    T& at(std::size_t index);
 
     bool empty() const;
     std::size_t getCapacity() const;
@@ -41,8 +42,8 @@ private:
     std::size_t bufferSize;
     std::unique_ptr<T[]> buffer;
 
-    void checkOverflow() const;
-    void checkUnderflow() const;
+    void checkPush() const;
+    void checkPop() const;
     void copyRingBuffer(const RingBuffer<T>& other);
 
 };

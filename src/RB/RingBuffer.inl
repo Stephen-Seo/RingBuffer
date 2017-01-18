@@ -50,7 +50,7 @@ void RingBuffer<T>::push(const T& reference)
 #ifndef NDEBUG
 //    std::clog << "RingBuffer<T>::push(const T&) called" << std::endl;
 #endif
-    checkOverflow();
+    checkPush();
 
     T value = reference;
 
@@ -64,7 +64,7 @@ void RingBuffer<T>::push(T&& r_value)
 #ifndef NDEBUG
 //    std::clog << "RingBuffer<T>::push(T&&) called" << std::endl;
 #endif
-    checkOverflow();
+    checkPush();
 
     buffer[w] = std::forward<T>(r_value);
     w = (w + 1) % bufferSize;
@@ -73,12 +73,29 @@ void RingBuffer<T>::push(T&& r_value)
 template <typename T>
 T&& RingBuffer<T>::pop()
 {
-    checkUnderflow();
+    checkPop();
 
     T value = std::move(buffer[r]);
     r = (r + 1) % bufferSize;
 
     return std::move(value);
+}
+
+template <typename T>
+T& RingBuffer<T>::operator [](std::size_t index)
+{
+    return buffer[(index + r) % bufferSize];
+}
+
+template <typename T>
+T& RingBuffer<T>::at(std::size_t index)
+{
+    if(index >= getSize())
+    {
+        throw std::out_of_range("ERROR: Index is too large!");
+    }
+
+    return (*this)[index];
 }
 
 template <typename T>
@@ -107,22 +124,22 @@ std::size_t RingBuffer<T>::getSize() const
 }
 
 template <typename T>
-void RingBuffer<T>::checkOverflow() const
+void RingBuffer<T>::checkPush() const
 {
     if((w == std::numeric_limits<std::size_t>::max() && r == 0)
         || (w == bufferSize - 1 && r == 0)
         || (w + 1 == r))
     {
-        throw std::overflow_error("RingBuffer max capacity reached, cannot push!");
+        throw std::out_of_range("RingBuffer max capacity reached, cannot push!");
     }
 }
 
 template <typename T>
-void RingBuffer<T>::checkUnderflow() const
+void RingBuffer<T>::checkPop() const
 {
     if(r == w)
     {
-        throw std::underflow_error("RingBuffer is empty, cannot pop!");
+        throw std::out_of_range("RingBuffer is empty, cannot pop!");
     }
 }
 

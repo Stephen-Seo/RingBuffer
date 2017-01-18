@@ -7,7 +7,7 @@
 
 using namespace RB;
 
-TEST(RingBuffer, OverflowUnderflow)
+TEST(RingBuffer, PopPush)
 {
     RingBuffer<int> rb(5);
 
@@ -21,7 +21,7 @@ TEST(RingBuffer, OverflowUnderflow)
     {
         rb.push(5);
     }
-    catch (const std::overflow_error& e)
+    catch (const std::out_of_range& e)
     {
         exceptionThrown = true;
     }
@@ -37,7 +37,7 @@ TEST(RingBuffer, OverflowUnderflow)
     {
         rb.pop();
     }
-    catch (const std::underflow_error& e)
+    catch (const std::out_of_range& e)
     {
         exceptionThrown = true;
     }
@@ -58,7 +58,7 @@ TEST(RingBuffer, OverflowUnderflow)
     {
         rb.push(5);
     }
-    catch (const std::overflow_error& e)
+    catch (const std::out_of_range& e)
     {
         exceptionThrown = true;
     }
@@ -74,7 +74,7 @@ TEST(RingBuffer, OverflowUnderflow)
     {
         rb.pop();
     }
-    catch (const std::underflow_error& e)
+    catch (const std::out_of_range& e)
     {
         exceptionThrown = true;
     }
@@ -154,5 +154,73 @@ TEST(RingBuffer, GetSize)
         rb.pop();
         EXPECT_EQ(19 - i, rb.getSize());
     }
+}
+
+TEST(RingBuffer, Indexing)
+{
+    RingBuffer<char> rb(10);
+
+    for(std::size_t i = 0; i < 3; ++i)
+    {
+        rb.push('a' + i);
+    }
+
+    EXPECT_EQ('a', rb.at(0));
+    EXPECT_EQ('b', rb.at(1));
+    EXPECT_EQ('c', rb.at(2));
+
+    bool exceptionThrown = false;
+    try
+    {
+        rb.at(3);
+    }
+    catch (const std::out_of_range& e)
+    {
+        exceptionThrown = true;
+    }
+    EXPECT_TRUE(exceptionThrown);
+
+    for(std::size_t i = 0; i < 3; ++i)
+    {
+        rb.pop();
+    }
+
+    exceptionThrown = false;
+    try
+    {
+        rb.at(0);
+    }
+    catch (const std::out_of_range& e)
+    {
+        exceptionThrown = true;
+    }
+    EXPECT_TRUE(exceptionThrown);
+
+    for(std::size_t i = 0; i < 10; ++i)
+    {
+        rb.push('a' + i);
+    }
+
+    EXPECT_EQ('a', rb.at(0));
+    EXPECT_EQ('b', rb.at(1));
+    EXPECT_EQ('c', rb.at(2));
+    EXPECT_EQ('d', rb.at(3));
+    EXPECT_EQ('e', rb.at(4));
+    EXPECT_EQ('f', rb.at(5));
+    EXPECT_EQ('g', rb.at(6));
+    EXPECT_EQ('h', rb.at(7));
+    EXPECT_EQ('i', rb.at(8));
+    EXPECT_EQ('j', rb.at(9));
+
+    exceptionThrown = false;
+    try
+    {
+        rb.at(10);
+    }
+    catch (const std::out_of_range& e)
+    {
+        exceptionThrown = true;
+    }
+    EXPECT_TRUE(exceptionThrown);
 }
 
