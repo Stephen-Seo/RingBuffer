@@ -48,7 +48,7 @@ template <typename T>
 void RingBuffer<T>::push(const T& reference)
 {
 #ifndef NDEBUG
-    std::clog << "RingBuffer<T>::push(const T&) called" << std::endl;
+//    std::clog << "RingBuffer<T>::push(const T&) called" << std::endl;
 #endif
     checkOverflow();
 
@@ -62,7 +62,7 @@ template <typename T>
 void RingBuffer<T>::push(T&& r_value)
 {
 #ifndef NDEBUG
-    std::clog << "RingBuffer<T>::push(T&&) called" << std::endl;
+//    std::clog << "RingBuffer<T>::push(T&&) called" << std::endl;
 #endif
     checkOverflow();
 

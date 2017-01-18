@@ -8,6 +8,9 @@
 
 #include <memory>
 
+namespace RB
+{
+
 template <typename T>
 class RingBuffer
 {
@@ -45,6 +48,8 @@ private:
 };
 
 #include "RingBuffer.inl"
+
+} // namespace RB
 
 #endif
 
