@@ -27,6 +27,8 @@ install(DIRECTORY src/RB DESTINATION include)
 find_package(GTest QUIET)
 
 if(GTEST_FOUND)
+    message(STATUS "Found GTest, building UnitTest...")
+
     add_executable(UnitTest ${UNIT_TEST_SOURCES})
 
     target_include_directories(UnitTest
