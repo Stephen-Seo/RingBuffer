@@ -22,6 +22,8 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
 endif()
 
+install(DIRECTORY src/RB DESTINATION include)
+
 find_package(GTest QUIET)
 
 if(GTEST_FOUND)
