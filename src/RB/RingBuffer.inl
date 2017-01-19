@@ -158,7 +158,7 @@ void RingBuffer<T>::copyRingBuffer(const RingBuffer<T>& other)
             i = (i + 1) % bufferSize)
         {
             buffer[w] = other.buffer[i];
-            w = w + 1; // shouldn't need to use modulus
+            w = w + 1; // shouldn't need to use modulo
         }
     }
 }
