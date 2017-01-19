@@ -6,7 +6,8 @@
 template <typename T>
 RingBuffer<T>::RingBuffer(std::size_t capacity) :
 r(0),
-w(0)
+w(0),
+isEmpty(true)
 {
     if(capacity == 0)
     {
@@ -15,18 +16,9 @@ w(0)
             << std::endl;
         capacity = RING_BUFFER_DEFAULT_CAPACITY;
     }
-    else if(capacity == std::numeric_limits<std::size_t>::max())
-    {
-        std::cerr << "WARNING: Capacity cannot be max ("
-            << std::numeric_limits<std::size_t>::max()
-            << ") due to limitation with RingBuffer, setting capacity to "
-            << std::numeric_limits<std::size_t>::max() - 1
-            << std::endl;
-        capacity = std::numeric_limits<std::size_t>::max() - 1;
-    }
 
-    buffer = std::make_unique<T[]>(capacity + 1);
-    bufferSize = capacity + 1;
+    buffer = std::make_unique<T[]>(capacity);
+    bufferSize = capacity;
 }
 
 template <typename T>
@@ -56,6 +48,8 @@ void RingBuffer<T>::push(const T& reference)
 
     buffer[w] = std::move(value);
     w = (w + 1) % bufferSize;
+
+    isEmpty = false;
 }
 
 template <typename T>
@@ -68,6 +62,8 @@ void RingBuffer<T>::push(T&& r_value)
 
     buffer[w] = std::forward<T>(r_value);
     w = (w + 1) % bufferSize;
+
+    isEmpty = false;
 }
 
 template <typename T>
@@ -77,6 +73,11 @@ T&& RingBuffer<T>::pop()
 
     T value = std::move(buffer[r]);
     r = (r + 1) % bufferSize;
+
+    if(r == w)
+    {
+        isEmpty = true;
+    }
 
     return std::move(value);
 }
@@ -101,19 +102,19 @@ T& RingBuffer<T>::at(std::size_t index)
 template <typename T>
 bool RingBuffer<T>::empty() const
 {
-    return r == w;
+    return isEmpty;
 }
 
 template <typename T>
 std::size_t RingBuffer<T>::getCapacity() const
 {
-    return bufferSize - 1;
+    return bufferSize;
 }
 
 template <typename T>
 std::size_t RingBuffer<T>::getSize() const
 {
-    if(empty())
+    if(isEmpty)
     {
         return 0;
     }
@@ -126,9 +127,7 @@ std::size_t RingBuffer<T>::getSize() const
 template <typename T>
 void RingBuffer<T>::checkPush() const
 {
-    if((w == std::numeric_limits<std::size_t>::max() && r == 0)
-        || (w == bufferSize - 1 && r == 0)
-        || (w + 1 == r))
+    if(!isEmpty && r == w)
     {
         throw std::out_of_range("RingBuffer max capacity reached, cannot push!");
     }
@@ -137,7 +136,7 @@ void RingBuffer<T>::checkPush() const
 template <typename T>
 void RingBuffer<T>::checkPop() const
 {
-    if(r == w)
+    if(isEmpty)
     {
         throw std::out_of_range("RingBuffer is empty, cannot pop!");
     }
@@ -148,10 +147,12 @@ void RingBuffer<T>::copyRingBuffer(const RingBuffer<T>& other)
 {
     r = 0;
     w = 0;
+    isEmpty = true;
     buffer = std::make_unique<T[]>(other.bufferSize);
     bufferSize = other.bufferSize;
-    if(other.buffer && !other.empty())
+    if(other.buffer && !other.isEmpty)
     {
+        isEmpty = false;
         for(std::size_t i = other.r;
             i != other.w;
             i = (i + 1) % bufferSize)

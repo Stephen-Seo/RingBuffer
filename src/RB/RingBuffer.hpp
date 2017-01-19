@@ -40,6 +40,7 @@ private:
     std::size_t r;
     std::size_t w;
     std::size_t bufferSize;
+    bool isEmpty;
     std::unique_ptr<T[]> buffer;
 
     void checkPush() const;
