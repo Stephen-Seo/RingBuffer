@@ -319,6 +319,7 @@ TEST(RingBuffer, OutputIterator)
         }
         {
             const decltype(iterator)& incIter = iterator++;
+            EXPECT_NE(incIter, iterator);
         }
 
         iterator = rb.begin();
@@ -350,6 +351,7 @@ TEST(RingBuffer, OutputIterator)
         }
         {
             const decltype(iterator)& incIter = iterator++;
+            EXPECT_NE(incIter, iterator);
         }
 
         iterator = rb.begin();
