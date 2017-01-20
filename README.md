@@ -24,3 +24,11 @@ make
 make install
 ```
 
+## Compiling with Clang
+
+```
+cd build
+CC=clang CXX=clang++ cmake -DCMAKE_INSTALL_PREFIX=./install_here ..
+make
+```
+
