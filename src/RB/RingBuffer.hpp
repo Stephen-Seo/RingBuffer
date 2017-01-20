@@ -35,7 +35,10 @@ public:
     T&& pop();
 
     T& operator [](std::size_t index);
+    const T& operator [](std::size_t index) const;
+
     T& at(std::size_t index);
+    const T& at(std::size_t index) const;
 
     bool empty() const;
     std::size_t getCapacity() const;

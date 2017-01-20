@@ -84,7 +84,24 @@ T& RB::RingBuffer<T>::operator [](std::size_t index)
 }
 
 template <typename T>
+const T& RB::RingBuffer<T>::operator [](std::size_t index) const
+{
+    return buffer[(index + r) % bufferSize];
+}
+
+template <typename T>
 T& RB::RingBuffer<T>::at(std::size_t index)
+{
+    if(index >= getSize())
+    {
+        throw std::out_of_range("ERROR: Index is too large!");
+    }
+
+    return (*this)[index];
+}
+
+template <typename T>
+const T& RB::RingBuffer<T>::at(std::size_t index) const
 {
     if(index >= getSize())
     {
