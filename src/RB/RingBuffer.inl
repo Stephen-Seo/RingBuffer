@@ -9,15 +9,10 @@ r(0),
 w(0),
 isEmpty(true)
 {
-    if(capacity == 0)
+    if(capacity != 0)
     {
-        std::cerr << "WARNING: Invalid capacity of " << capacity
-            << ", using default of " << RING_BUFFER_DEFAULT_CAPACITY
-            << std::endl;
-        capacity = RING_BUFFER_DEFAULT_CAPACITY;
+        buffer = std::make_unique<T[]>(capacity);
     }
-
-    buffer = std::make_unique<T[]>(capacity);
     bufferSize = capacity;
 }
 
@@ -122,6 +117,97 @@ std::size_t RB::RingBuffer<T>::getSize() const
     {
         return r < w ? w - r : bufferSize - r + w;
     }
+}
+
+template <typename T>
+void RB::RingBuffer<T>::changeCapacity(std::size_t newCapacity)
+{
+    std::unique_ptr<T[]> newBuffer = std::make_unique<T[]>(newCapacity);
+    if(!isEmpty)
+    {
+        for(std::size_t i = 0; i < getSize() && i < newCapacity; ++i)
+        {
+            newBuffer[i] = buffer[(r + i) % bufferSize];
+        }
+    }
+
+    std::size_t size = getSize();
+    r = 0;
+    if(size < newCapacity)
+    {
+        w = size;
+    }
+    else
+    {
+        w = 0;
+    }
+    buffer = std::move(newBuffer);
+    bufferSize = newCapacity;
+}
+
+template <typename T>
+void RB::RingBuffer<T>::reserve(std::size_t newCapacity)
+{
+    changeCapacity(newCapacity);
+}
+
+template <typename T>
+void RB::RingBuffer<T>::changeSize(std::size_t newSize)
+{
+    changeSize(newSize, T());
+}
+
+template <typename T>
+void RB::RingBuffer<T>::changeSize(std::size_t newSize, const T& toCopy)
+{
+    if(newSize > bufferSize)
+    {
+        throw std::out_of_range("ERROR: newSize is greater than bufferSize!");
+    }
+
+    std::size_t size = getSize();
+    if(newSize < size)
+    {
+        for(unsigned int i = 0; i < size - newSize; ++i)
+        {
+            if(w == 0)
+            {
+                w = bufferSize - 1;
+            }
+            else
+            {
+                --w;
+            }
+            if(w == r)
+            {
+                isEmpty = true;
+            }
+        }
+    }
+    else
+    {
+        for(unsigned int i = 0; i < newSize - size; ++i)
+        {
+            isEmpty = false;
+            buffer[w++] = toCopy;
+            if(w == bufferSize)
+            {
+                w = 0;
+            }
+        }
+    }
+}
+
+template <typename T>
+void RB::RingBuffer<T>::resize(std::size_t newSize)
+{
+    changeSize(newSize);
+}
+
+template <typename T>
+void RB::RingBuffer<T>::resize(std::size_t newSize, const T& toCopy)
+{
+    changeSize(newSize, toCopy);
 }
 
 template <typename T>

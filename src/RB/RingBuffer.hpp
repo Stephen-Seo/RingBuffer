@@ -41,6 +41,14 @@ public:
     std::size_t getCapacity() const;
     std::size_t getSize() const;
 
+    void changeCapacity(std::size_t newCapacity);
+    void reserve(std::size_t newCapacity);
+
+    void changeSize(std::size_t newSize);
+    void changeSize(std::size_t newSize, const T& toCopy);
+    void resize(std::size_t newSize);
+    void resize(std::size_t newSize, const T& toCopy);
+
 private:
     std::size_t r;
     std::size_t w;

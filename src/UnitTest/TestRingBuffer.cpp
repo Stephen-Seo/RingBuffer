@@ -84,7 +84,7 @@ TEST(RingBuffer, PopPush)
 TEST(RingBuffer, Capacity)
 {
     RingBuffer<char> rb(0);
-    EXPECT_EQ(RING_BUFFER_DEFAULT_CAPACITY, rb.getCapacity());
+    EXPECT_EQ(0, rb.getCapacity());
 
     rb = RingBuffer<char>(512);
     EXPECT_EQ(512, rb.getCapacity());
@@ -1182,5 +1182,121 @@ TEST(RingBuffer, IteratorMisc)
 
     rb.push('a');
     EXPECT_NE(rb.begin(), rb.end());
+}
+
+TEST(RingBuffer, ChangeCapacity)
+{
+    RingBuffer<char> rb(10);
+
+    for(unsigned int i = 0; i < 7; ++i)
+    {
+        rb.push('a' + i);
+        rb.pop();
+    }
+    for(unsigned int i = 0; i < 7; ++i)
+    {
+        rb.push('a' + i);
+    }
+
+    rb.changeCapacity(7);
+    EXPECT_EQ(7, rb.getCapacity());
+    EXPECT_EQ(7, rb.getSize());
+
+    for(unsigned int i = 0; i < 7; ++i)
+    {
+        EXPECT_EQ('a' + i, rb.at(i));
+    }
+
+    for(unsigned int i = 0; i < 7; ++i)
+    {
+        rb.pop();
+        rb.push('a' + i);
+    }
+
+    rb.changeCapacity(4);
+    EXPECT_EQ(4, rb.getCapacity());
+    EXPECT_EQ(4, rb.getSize());
+
+    for(unsigned int i = 0; i < 4; ++i)
+    {
+        EXPECT_EQ('a' + i, rb.at(i));
+    }
+
+    rb.changeCapacity(10);
+    EXPECT_EQ(10, rb.getCapacity());
+    EXPECT_EQ(4, rb.getSize());
+
+    for(unsigned int i = 0; i < 4; ++i)
+    {
+        EXPECT_EQ('a' + i, rb.at(i));
+    }
+}
+
+TEST(RingBuffer, ChangeSize)
+{
+    RingBuffer<char> rb(10);
+
+    for(unsigned int i = 0; i < 7; ++i)
+    {
+        rb.push('a' + i);
+    }
+
+    EXPECT_EQ(7, rb.getSize());
+
+    rb.changeSize(4);
+    EXPECT_EQ(4, rb.getSize());
+    for(unsigned int i = 0; i < 4; ++i)
+    {
+        EXPECT_EQ('a' + i, rb.at(i));
+    }
+
+    rb.changeSize(7, 'z');
+    EXPECT_EQ(7, rb.getSize());
+    for(unsigned int i = 0; i < 7; ++i)
+    {
+        if(i < 4)
+        {
+            EXPECT_EQ('a' + i, rb.at(i));
+        }
+        else
+        {
+            EXPECT_EQ('z', rb.at(i));
+        }
+    }
+
+    for(unsigned int i = 0; i < 7; ++i)
+    {
+        rb.pop();
+        rb.push('a' + i);
+    }
+
+    for(unsigned int i = 0; i < 7; ++i)
+    {
+        EXPECT_EQ('a' + i, rb.at(i));
+    }
+
+    EXPECT_EQ(7, rb.getSize());
+    rb.changeSize(5);
+    EXPECT_EQ(5, rb.getSize());
+
+    for(unsigned int i = 0; i < 5; ++i)
+    {
+        EXPECT_EQ('a' + i, rb.at(i));
+    }
+
+    rb.changeSize(10, 'z');
+    EXPECT_EQ(10, rb.getSize());
+
+    for(unsigned int i = 0; i < 10; ++i)
+    {
+        if(i < 5)
+        {
+            EXPECT_EQ('a' + i, rb.at(i));
+        }
+        else
+        {
+            EXPECT_EQ('z', rb.at(i));
+        }
+    }
 }
 
