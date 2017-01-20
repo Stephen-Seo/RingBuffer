@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <bitset>
+#include <type_traits>
 
 namespace RB
 {
@@ -52,13 +53,14 @@ private:
     void copyRingBuffer(const RingBuffer<T>& other);
 
 public:
+    template <bool IsConst>
     class Iterator
     {
     public:
         typedef std::ptrdiff_t difference_type;
         typedef T value_type;
-        typedef T& reference;
-        typedef T* pointer;
+        typedef std::conditional_t<IsConst, const T&, T&> reference;
+        typedef std::conditional_t<IsConst, const T*, T*> pointer;
         typedef std::random_access_iterator_tag iterator_category;
 
         typedef RingBuffer<T> parent_type;
@@ -118,8 +120,14 @@ public:
 
     };
 
-    Iterator begin();
-    Iterator end();
+    Iterator<false> begin();
+    Iterator<false> end();
+
+    Iterator<true> begin() const;
+    Iterator<true> end() const;
+
+    Iterator<true> cbegin() const;
+    Iterator<true> cend() const;
 
 };
 

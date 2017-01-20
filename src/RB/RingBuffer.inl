@@ -2,7 +2,6 @@
 #include <iostream>
 #include <stdexcept>
 #include <limits>
-#include <type_traits>
 
 template <typename T>
 RB::RingBuffer<T>::RingBuffer(std::size_t capacity) :
@@ -165,7 +164,8 @@ void RB::RingBuffer<T>::copyRingBuffer(const RB::RingBuffer<T>& other)
 }
 
 template <typename T>
-RB::RingBuffer<T>::Iterator::Iterator() :
+template <bool IsConst>
+RB::RingBuffer<T>::Iterator<IsConst>::Iterator() :
 r(0),
 w(0),
 bufferSize(0),
@@ -177,7 +177,8 @@ buffer(nullptr)
 }
 
 template <typename T>
-RB::RingBuffer<T>::Iterator::Iterator(
+template <bool IsConst>
+RB::RingBuffer<T>::Iterator<IsConst>::Iterator(
     const std::size_t& r,
     const std::size_t& w,
     const std::size_t& bufferSize,
@@ -199,13 +200,15 @@ buffer(buffer)
 }
 
 template <typename T>
-typename RB::RingBuffer<T>::Iterator::reference RB::RingBuffer<T>::Iterator::operator *()
+template <bool IsConst>
+typename RB::RingBuffer<T>::template Iterator<IsConst>::reference RB::RingBuffer<T>::Iterator<IsConst>::operator *()
 {
     return buffer[index];
 }
 
 template <typename T>
-typename RB::RingBuffer<T>::Iterator& RB::RingBuffer<T>::Iterator::operator ++()
+template <bool IsConst>
+typename RB::RingBuffer<T>::template Iterator<IsConst>& RB::RingBuffer<T>::Iterator<IsConst>::operator ++()
 {
     index = (index + 1) % bufferSize;
     if(index == w)
@@ -216,7 +219,8 @@ typename RB::RingBuffer<T>::Iterator& RB::RingBuffer<T>::Iterator::operator ++()
 }
 
 template <typename T>
-bool RB::RingBuffer<T>::Iterator::operator ==(const Iterator& other) const
+template <bool IsConst>
+bool RB::RingBuffer<T>::Iterator<IsConst>::operator ==(const Iterator& other) const
 {
     return (flags.test(2) && other.flags.test(2))
         || (index == other.index
@@ -224,19 +228,22 @@ bool RB::RingBuffer<T>::Iterator::operator ==(const Iterator& other) const
 }
 
 template <typename T>
-bool RB::RingBuffer<T>::Iterator::operator !=(const Iterator& other) const
+template <bool IsConst>
+bool RB::RingBuffer<T>::Iterator<IsConst>::operator !=(const Iterator& other) const
 {
     return !(*this == other);
 }
 
 template <typename T>
-typename RB::RingBuffer<T>::Iterator::pointer RB::RingBuffer<T>::Iterator::operator ->()
+template <bool IsConst>
+typename RB::RingBuffer<T>::template Iterator<IsConst>::pointer RB::RingBuffer<T>::Iterator<IsConst>::operator ->()
 {
     return &(buffer[index]);
 }
 
 template <typename T>
-typename RB::RingBuffer<T>::Iterator RB::RingBuffer<T>::Iterator::operator ++(int)
+template <bool IsConst>
+typename RB::RingBuffer<T>::template Iterator<IsConst> RB::RingBuffer<T>::Iterator<IsConst>::operator ++(int)
 {
     Iterator copy = *this;
     ++(*this);
@@ -244,7 +251,8 @@ typename RB::RingBuffer<T>::Iterator RB::RingBuffer<T>::Iterator::operator ++(in
 }
 
 template <typename T>
-typename RB::RingBuffer<T>::Iterator& RB::RingBuffer<T>::Iterator::operator --()
+template <bool IsConst>
+typename RB::RingBuffer<T>::template Iterator<IsConst>& RB::RingBuffer<T>::Iterator<IsConst>::operator --()
 {
     if(flags.test(2))
     {
@@ -275,7 +283,8 @@ typename RB::RingBuffer<T>::Iterator& RB::RingBuffer<T>::Iterator::operator --()
 }
 
 template <typename T>
-typename RB::RingBuffer<T>::Iterator RB::RingBuffer<T>::Iterator::operator --(int)
+template <bool IsConst>
+typename RB::RingBuffer<T>::template Iterator<IsConst> RB::RingBuffer<T>::Iterator<IsConst>::operator --(int)
 {
     Iterator copy = *this;
     --(*this);
@@ -283,7 +292,8 @@ typename RB::RingBuffer<T>::Iterator RB::RingBuffer<T>::Iterator::operator --(in
 }
 
 template <typename T>
-typename RB::RingBuffer<T>::Iterator& RB::RingBuffer<T>::Iterator::operator +=(const RB::RingBuffer<T>::Iterator::difference_type& n)
+template <bool IsConst>
+typename RB::RingBuffer<T>::template Iterator<IsConst>& RB::RingBuffer<T>::Iterator<IsConst>::operator +=(const Iterator::difference_type& n)
 {
     difference_type m = n;
     if(m >= 0)
@@ -305,7 +315,8 @@ typename RB::RingBuffer<T>::Iterator& RB::RingBuffer<T>::Iterator::operator +=(c
 }
 
 template <typename T>
-typename RB::RingBuffer<T>::Iterator RB::RingBuffer<T>::Iterator::operator +(const RB::RingBuffer<T>::Iterator::difference_type& n)
+template <bool IsConst>
+typename RB::RingBuffer<T>::template Iterator<IsConst> RB::RingBuffer<T>::Iterator<IsConst>::operator +(const Iterator::difference_type& n)
 {
     Iterator copy = *this;
     return copy += n;
@@ -325,20 +336,23 @@ IteratorType operator +(const typename IteratorType::difference_type& n, const I
 }
 
 template <typename T>
-typename RB::RingBuffer<T>::Iterator& RB::RingBuffer<T>::Iterator::operator -=(const RB::RingBuffer<T>::Iterator::difference_type& n)
+template <bool IsConst>
+typename RB::RingBuffer<T>::template Iterator<IsConst>& RB::RingBuffer<T>::Iterator<IsConst>::operator -=(const Iterator::difference_type& n)
 {
     return (*this) += -n;
 }
 
 template <typename T>
-typename RB::RingBuffer<T>::Iterator RB::RingBuffer<T>::Iterator::operator -(const RB::RingBuffer<T>::Iterator::difference_type& n)
+template <bool IsConst>
+typename RB::RingBuffer<T>::template Iterator<IsConst> RB::RingBuffer<T>::Iterator<IsConst>::operator -(const Iterator::difference_type& n)
 {
     Iterator copy = *this;
     return copy -= n;
 }
 
 template <typename T>
-typename RB::RingBuffer<T>::Iterator::difference_type RB::RingBuffer<T>::Iterator::operator -(const typename RB::RingBuffer<T>::Iterator& other)
+template <bool IsConst>
+typename RB::RingBuffer<T>::template Iterator<IsConst>::difference_type RB::RingBuffer<T>::Iterator<IsConst>::operator -(const Iterator& other)
 {
     if(flags.test(2) && other.flags.test(2))
     {
@@ -374,13 +388,15 @@ typename RB::RingBuffer<T>::Iterator::difference_type RB::RingBuffer<T>::Iterato
 }
 
 template <typename T>
-typename RB::RingBuffer<T>::Iterator::reference RB::RingBuffer<T>::Iterator::operator [](const typename RB::RingBuffer<T>::Iterator::difference_type& n)
+template <bool IsConst>
+typename RB::RingBuffer<T>::template Iterator<IsConst>::reference RB::RingBuffer<T>::Iterator<IsConst>::operator [](const Iterator::difference_type& n)
 {
     return *(*this + n);
 }
 
 template <typename T>
-bool RB::RingBuffer<T>::Iterator::operator <(const typename RB::RingBuffer<T>::Iterator& other) const
+template <bool IsConst>
+bool RB::RingBuffer<T>::Iterator<IsConst>::operator <(const Iterator& other) const
 {
     if(flags.test(2))
     {
@@ -412,32 +428,59 @@ bool RB::RingBuffer<T>::Iterator::operator <(const typename RB::RingBuffer<T>::I
 }
 
 template <typename T>
-bool RB::RingBuffer<T>::Iterator::operator >(const typename RB::RingBuffer<T>::Iterator& other) const
+template <bool IsConst>
+bool RB::RingBuffer<T>::Iterator<IsConst>::operator >(const Iterator& other) const
 {
     return other < *this;
 }
 
 template <typename T>
-bool RB::RingBuffer<T>::Iterator::operator >=(const typename RB::RingBuffer<T>::Iterator& other) const
+template <bool IsConst>
+bool RB::RingBuffer<T>::Iterator<IsConst>::operator >=(const Iterator& other) const
 {
     return !(*this < other);
 }
 
 template <typename T>
-bool RB::RingBuffer<T>::Iterator::operator <=(const typename RB::RingBuffer<T>::Iterator& other) const
+template <bool IsConst>
+bool RB::RingBuffer<T>::Iterator<IsConst>::operator <=(const Iterator& other) const
 {
     return !(*this > other);
 }
 
 template <typename T>
-typename RB::RingBuffer<T>::Iterator RB::RingBuffer<T>::begin()
+typename RB::RingBuffer<T>::template Iterator<false> RB::RingBuffer<T>::begin()
 {
-    return Iterator(r, w, bufferSize, r, isEmpty, isEmpty, buffer.get());
+    return Iterator<false>(r, w, bufferSize, r, isEmpty, isEmpty, buffer.get());
 }
 
 template <typename T>
-typename RB::RingBuffer<T>::Iterator RB::RingBuffer<T>::end()
+typename RB::RingBuffer<T>::template Iterator<false> RB::RingBuffer<T>::end()
 {
-    return Iterator(r, w, bufferSize, r, isEmpty, true, buffer.get());
+    return Iterator<false>(r, w, bufferSize, r, isEmpty, true, buffer.get());
+}
+
+template <typename T>
+typename RB::RingBuffer<T>::template Iterator<true> RB::RingBuffer<T>::begin() const
+{
+    return cbegin();
+}
+
+template <typename T>
+typename RB::RingBuffer<T>::template Iterator<true> RB::RingBuffer<T>::end() const
+{
+    return cend();
+}
+
+template <typename T>
+typename RB::RingBuffer<T>::template Iterator<true> RB::RingBuffer<T>::cbegin() const
+{
+    return Iterator<true>(r, w, bufferSize, r, isEmpty, isEmpty, buffer.get());
+}
+
+template <typename T>
+typename RB::RingBuffer<T>::template Iterator<true> RB::RingBuffer<T>::cend() const
+{
+    return Iterator<true>(r, w, bufferSize, r, isEmpty, true, buffer.get());
 }
 
