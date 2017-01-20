@@ -17,6 +17,8 @@ template <typename T>
 class RingBuffer
 {
 public:
+    typedef T value_type;
+
     RingBuffer(std::size_t capacity = RING_BUFFER_DEFAULT_CAPACITY);
 
     // copy
@@ -58,6 +60,8 @@ public:
         typedef T& reference;
         typedef T* pointer;
         typedef std::random_access_iterator_tag iterator_category;
+
+        typedef RingBuffer<T> parent_type;
 
         Iterator();
         Iterator(

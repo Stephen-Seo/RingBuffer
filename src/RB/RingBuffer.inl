@@ -2,6 +2,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <limits>
+#include <type_traits>
 
 template <typename T>
 RB::RingBuffer<T>::RingBuffer(std::size_t capacity) :
@@ -218,7 +219,8 @@ template <typename T>
 bool RB::RingBuffer<T>::Iterator::operator ==(const Iterator& other) const
 {
     return (flags.test(2) && other.flags.test(2))
-        || (index == other.index);
+        || (index == other.index
+            && !flags.test(2) && !other.flags.test(2));
 }
 
 template <typename T>
@@ -309,10 +311,16 @@ typename RB::RingBuffer<T>::Iterator RB::RingBuffer<T>::Iterator::operator +(con
     return copy += n;
 }
 
-template <typename T>
-typename RB::RingBuffer<T>::Iterator operator +(const typename RB::RingBuffer<T>::Iterator::difference_type& n, const typename RB::RingBuffer<T>::Iterator& iter)
+// only enable for ContainerType == RB::RingBuffer<T>
+template <
+    typename IteratorType,
+    typename ContainerType = typename IteratorType::parent_type,
+    typename T = typename ContainerType::value_type,
+    typename = std::enable_if_t<std::is_same<ContainerType, RB::RingBuffer<T>>::value>
+>
+IteratorType operator +(const typename IteratorType::difference_type& n, const IteratorType& iter)
 {
-    typename RB::RingBuffer<T>::Iterator copy = iter;
+    IteratorType copy = iter;
     return copy += n;
 }
 
@@ -332,13 +340,36 @@ typename RB::RingBuffer<T>::Iterator RB::RingBuffer<T>::Iterator::operator -(con
 template <typename T>
 typename RB::RingBuffer<T>::Iterator::difference_type RB::RingBuffer<T>::Iterator::operator -(const typename RB::RingBuffer<T>::Iterator& other)
 {
-    if(index >= other.index)
+    if(flags.test(2) && other.flags.test(2))
     {
-        return index - other.index;
+        return 0;
+    }
+    else if(flags.test(2))
+    {
+        if(w >= other.index)
+        {
+            return w - other.index;
+        }
+        else
+        {
+            return w + other.bufferSize - other.index;
+        }
+    }
+    else if(!flags.test(2) && !other.flags.test(2))
+    {
+        if(index >= other.index)
+        {
+            return index - other.index;
+        }
+        else
+        {
+            return index + other.bufferSize - other.index;
+        }
     }
     else
     {
-        return index + other.bufferSize - other.index;
+        // invalid condition
+        return 0;
     }
 }
 
@@ -351,21 +382,32 @@ typename RB::RingBuffer<T>::Iterator::reference RB::RingBuffer<T>::Iterator::ope
 template <typename T>
 bool RB::RingBuffer<T>::Iterator::operator <(const typename RB::RingBuffer<T>::Iterator& other) const
 {
-    if(index >= r && other.index >= other.r)
-    {
-        return index < other.index;
-    }
-    else if(index >= r && other.index < other.r)
-    {
-        return true;
-    }
-    else if(index < r && other.index >= other.r)
+    if(flags.test(2))
     {
         return false;
     }
-    else //if(index < r && other.index < other.r)
+    else if(other.flags.test(2))
     {
-        return index < other.index;
+        return true;
+    }
+    else
+    {
+        if(index >= r && other.index >= other.r)
+        {
+            return index < other.index;
+        }
+        else if(index >= r && other.index < other.r)
+        {
+            return true;
+        }
+        else if(index < r && other.index >= other.r)
+        {
+            return false;
+        }
+        else //if(index < r && other.index < other.r)
+        {
+            return index < other.index;
+        }
     }
 }
 
@@ -390,7 +432,7 @@ bool RB::RingBuffer<T>::Iterator::operator <=(const typename RB::RingBuffer<T>::
 template <typename T>
 typename RB::RingBuffer<T>::Iterator RB::RingBuffer<T>::begin()
 {
-    return Iterator(r, w, bufferSize, r, isEmpty, false, buffer.get());
+    return Iterator(r, w, bufferSize, r, isEmpty, isEmpty, buffer.get());
 }
 
 template <typename T>

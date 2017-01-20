@@ -224,3 +224,524 @@ TEST(RingBuffer, Indexing)
     EXPECT_TRUE(exceptionThrown);
 }
 
+TEST(RingBuffer, Iterator)
+{
+    RingBuffer<char> rb(10);
+
+    for(unsigned int i = 0; i < 7; ++i)
+    {
+        rb.push('a' + i);
+    }
+
+    {
+        auto iterator = rb.begin();
+        for(unsigned int i = 0; i < 7; ++i)
+        {
+            EXPECT_EQ(*iterator, 'a' + i);
+            ++iterator;
+        }
+        EXPECT_EQ(iterator, rb.end());
+    }
+
+    for(unsigned int i = 0; i < 7; ++i)
+    {
+        rb.pop();
+        rb.push('a' + i);
+    }
+
+    {
+        auto iterator = rb.begin();
+        for(unsigned int i = 0; i < 7; ++i)
+        {
+            EXPECT_EQ(*iterator, 'a' + i);
+            ++iterator;
+        }
+        EXPECT_EQ(iterator, rb.end());
+    }
+}
+
+TEST(RingBuffer, OutputIterator)
+{
+    RingBuffer<char> rb(10);
+
+    for(unsigned int i = 0; i < 7; ++i)
+    {
+        rb.push('a' + i);
+    }
+
+    {
+        auto iterator = rb.begin();
+        EXPECT_EQ(*iterator, 'a');
+
+        *iterator = '0';
+        EXPECT_EQ(*iterator, '0');
+
+        {
+            decltype(iterator)& incIter = ++iterator;
+            EXPECT_EQ(incIter, iterator);
+        }
+        {
+            const decltype(iterator)& incIter = iterator++;
+        }
+
+        iterator = rb.begin();
+        *iterator++ = '1';
+        EXPECT_EQ(*rb.begin(), '1');
+
+        *iterator++ = '2';
+        auto secondIterator = rb.begin();
+        ++secondIterator;
+        EXPECT_EQ(*secondIterator, '2');
+    }
+
+    for(unsigned int i = 0; i < 7; ++i)
+    {
+        rb.pop();
+        rb.push('a' + i);
+    }
+
+    {
+        auto iterator = rb.begin();
+        EXPECT_EQ(*iterator, 'a');
+
+        *iterator = '0';
+        EXPECT_EQ(*iterator, '0');
+
+        {
+            decltype(iterator)& incIter = ++iterator;
+            EXPECT_EQ(incIter, iterator);
+        }
+        {
+            const decltype(iterator)& incIter = iterator++;
+        }
+
+        iterator = rb.begin();
+        *iterator++ = '1';
+        EXPECT_EQ(*rb.begin(), '1');
+
+        *iterator++ = '2';
+        auto secondIterator = rb.begin();
+        ++secondIterator;
+        EXPECT_EQ(*secondIterator, '2');
+
+        *iterator++ = '3';
+        ++secondIterator;
+        EXPECT_EQ(*secondIterator, '3');
+
+        *iterator++ = '4';
+        ++secondIterator;
+        EXPECT_EQ(*secondIterator, '4');
+    }
+}
+
+TEST(RingBuffer, ForwardIterator)
+{
+    RingBuffer<char> rb(10);
+
+    for(unsigned int i = 0; i < 7; ++i)
+    {
+        rb.push('a' + i);
+    }
+
+    {
+        auto iterA = rb.begin();
+        auto iterB = rb.begin();
+
+        while(iterA != rb.end() && iterB != rb.end())
+        {
+            EXPECT_EQ(iterA, iterB);
+            EXPECT_EQ(*iterA, *iterB);
+            ++iterA;
+            EXPECT_NE(iterA, iterB);
+            ++iterB;
+        }
+
+        EXPECT_EQ(iterA, iterB);
+        EXPECT_NE(iterA, rb.begin());
+        EXPECT_NE(iterB, rb.begin());
+
+        iterA = rb.begin();
+        iterB = iterA++;
+        EXPECT_EQ(rb.begin(), iterB);
+        for(unsigned int i = 0; i < 7; ++i)
+        {
+            EXPECT_EQ('a' + i, *iterB++);
+        }
+    }
+
+    for(unsigned int i = 0; i < 7; ++i)
+    {
+        rb.pop();
+        rb.push('a' + i);
+    }
+
+    {
+        auto iterA = rb.begin();
+        auto iterB = rb.begin();
+
+        while(iterA != rb.end() && iterB != rb.end())
+        {
+            EXPECT_EQ(iterA, iterB);
+            EXPECT_EQ(*iterA, *iterB);
+            ++iterA;
+            EXPECT_NE(iterA, iterB);
+            ++iterB;
+        }
+
+        EXPECT_EQ(iterA, iterB);
+        EXPECT_NE(iterA, rb.begin());
+        EXPECT_NE(iterB, rb.begin());
+
+        iterA = rb.begin();
+        iterB = iterA++;
+        EXPECT_EQ(rb.begin(), iterB);
+        for(unsigned int i = 0; i < 7; ++i)
+        {
+            EXPECT_EQ('a' + i, *iterB++);
+        }
+    }
+}
+
+TEST(RingBuffer, BidirectionalIterator)
+{
+    RingBuffer<char> rb(10);
+
+    for(unsigned int i = 0; i < 7; ++i)
+    {
+        rb.push('a' + i);
+    }
+    {
+        auto iterator = rb.begin();
+        for(unsigned int i = 0; i < 7; ++i)
+        {
+            EXPECT_EQ(*iterator++, 'a' + i);
+        }
+        EXPECT_EQ(iterator, rb.end());
+        for(unsigned int i = 7; i-- > 0;)
+        {
+            EXPECT_EQ(*--iterator, 'a' + i);
+        }
+
+        iterator = rb.end();
+        for(unsigned int i = 7; i-- > 0;)
+        {
+            EXPECT_EQ(*--iterator, 'a' + i);
+        }
+        for(unsigned int i = 0; i < 7; ++i)
+        {
+            EXPECT_EQ(*iterator++, 'a' + i);
+        }
+        EXPECT_EQ(iterator, rb.end());
+    }
+
+    for(unsigned int i = 0; i < 7; ++i)
+    {
+        rb.pop();
+        rb.push('a' + i);
+    }
+    {
+        auto iterator = rb.begin();
+        for(unsigned int i = 0; i < 7; ++i)
+        {
+            EXPECT_EQ(*iterator++, 'a' + i);
+        }
+        EXPECT_EQ(iterator, rb.end());
+        for(unsigned int i = 7; i-- > 0;)
+        {
+            EXPECT_EQ(*--iterator, 'a' + i);
+        }
+
+        iterator = rb.end();
+        for(unsigned int i = 7; i-- > 0;)
+        {
+            EXPECT_EQ(*--iterator, 'a' + i);
+        }
+        for(unsigned int i = 0; i < 7; ++i)
+        {
+            EXPECT_EQ(*iterator++, 'a' + i);
+        }
+        EXPECT_EQ(iterator, rb.end());
+    }
+
+    for(unsigned int i = 7; i < 10; ++i)
+    {
+        rb.push('a' + i);
+    }
+    {
+        auto iterator = rb.begin();
+        for(unsigned int i = 0; i < 10; ++i)
+        {
+            EXPECT_EQ(*iterator++, 'a' + i);
+        }
+        EXPECT_EQ(iterator, rb.end());
+        for(unsigned int i = 10; i-- > 0;)
+        {
+            EXPECT_EQ(*--iterator, 'a' + i);
+        }
+    }
+
+    {
+        auto iterator = rb.end();
+        --iterator;
+        for(unsigned int i = 10; i-- > 1;)
+        {
+            EXPECT_EQ(*iterator--, 'a' + i);
+        }
+        EXPECT_EQ(*iterator, 'a');
+    }
+}
+
+TEST(RingBuffer, RandomAccessIterator)
+{
+    RingBuffer<char> rb(10);
+
+    for(unsigned int i = 0; i < 7; ++i)
+    {
+        rb.push('a' + i);
+    }
+
+    {
+        // +=
+        auto iterator = rb.begin();
+        EXPECT_TRUE(iterator == (iterator += 7));
+        EXPECT_EQ(rb.end(), iterator);
+        iterator += -7;
+        EXPECT_EQ(rb.begin(), iterator);
+        iterator += 4;
+        EXPECT_EQ(*iterator, 'a' + 4);
+    }
+    {
+        // +
+        auto begin = rb.begin();
+        auto iterator = begin + 7;
+        EXPECT_EQ(rb.end(), iterator);
+        iterator = iterator + -7;
+        EXPECT_EQ(rb.begin(), iterator);
+        iterator = 3 + iterator;
+        EXPECT_EQ(*iterator, 'a' + 3);
+        iterator = -2 + iterator;
+        EXPECT_EQ(*iterator, 'a' + 1);
+    }
+    {
+        // -=
+        auto iterator = rb.end();
+        EXPECT_TRUE(iterator == (iterator -= 2));
+        EXPECT_EQ(*iterator, 'a' + 5);
+        iterator -= 3;
+        EXPECT_EQ(*iterator, 'a' + 2);
+        iterator -= 2;
+        EXPECT_EQ(iterator, rb.begin());
+    }
+    {
+        // - between an iterator and difference_type
+        auto iterator = rb.end();
+        iterator = iterator - 3;
+        EXPECT_EQ(*iterator, 'a' + 4);
+        iterator = iterator - 2;
+        EXPECT_EQ(*iterator, 'a' + 2);
+        iterator = iterator - 2;
+        EXPECT_EQ(iterator, rb.begin());
+    }
+    {
+        // - between two iterators
+        auto iterA = rb.end();
+        auto iterB = rb.end();
+        EXPECT_EQ(iterA - iterB, 0);
+
+        iterB = rb.begin();
+        EXPECT_EQ(iterA - iterB, 7);
+
+        iterA -= 3;
+        EXPECT_EQ(iterA - iterB, 4);
+
+        iterB += 2;
+        EXPECT_EQ(iterA - iterB, 2);
+    }
+    {
+        // []
+        auto iterator = rb.begin();
+
+        for(unsigned int i = 0; i < 7; ++i)
+        {
+            EXPECT_EQ(iterator[i], 'a' + i);
+        }
+
+        iterator += 2;
+
+        for(unsigned int i = 0; i < 5; ++i)
+        {
+            EXPECT_EQ(iterator[i], 'a' + i + 2);
+        }
+    }
+    {
+        // < > <= >=
+        auto iterA = rb.end();
+        auto iterB = rb.begin();
+
+        EXPECT_TRUE(iterB < iterA);
+        EXPECT_TRUE(iterA > iterB);
+        EXPECT_TRUE(iterB <= iterA);
+        EXPECT_TRUE(iterA >= iterB);
+
+        --iterA; // 6
+        EXPECT_TRUE(iterB < iterA);
+        EXPECT_TRUE(iterA > iterB);
+        EXPECT_TRUE(iterB <= iterA);
+        EXPECT_TRUE(iterA >= iterB);
+
+        iterB += 2; // 2
+        iterA -= 2; // 4
+        EXPECT_TRUE(iterB < iterA);
+        EXPECT_TRUE(iterA > iterB);
+        EXPECT_TRUE(iterB <= iterA);
+        EXPECT_TRUE(iterA >= iterB);
+
+        iterB += 2; // 4
+        EXPECT_FALSE(iterB < iterA);
+        EXPECT_FALSE(iterA > iterB);
+        EXPECT_TRUE(iterB <= iterA);
+        EXPECT_TRUE(iterA >= iterB);
+
+        iterB += 2; // 6
+        EXPECT_FALSE(iterB < iterA);
+        EXPECT_FALSE(iterA > iterB);
+        EXPECT_FALSE(iterB <= iterA);
+        EXPECT_FALSE(iterA >= iterB);
+
+        EXPECT_FALSE(iterB < iterB);
+        EXPECT_FALSE(iterB > iterB);
+        EXPECT_TRUE(iterB <= iterB);
+        EXPECT_TRUE(iterB >= iterB);
+    }
+
+    for(unsigned int i = 0; i < 7; ++i)
+    {
+        rb.pop();
+        rb.push('a' + i);
+    }
+    {
+        // +=
+        auto iterator = rb.begin();
+        EXPECT_TRUE(iterator == (iterator += 7));
+        EXPECT_EQ(rb.end(), iterator);
+        iterator += -7;
+        EXPECT_EQ(rb.begin(), iterator);
+        iterator += 4;
+        EXPECT_EQ(*iterator, 'a' + 4);
+    }
+    {
+        // +
+        auto begin = rb.begin();
+        auto iterator = begin + 7;
+        EXPECT_EQ(rb.end(), iterator);
+        iterator = iterator + -7;
+        EXPECT_EQ(rb.begin(), iterator);
+        iterator = 3 + iterator;
+        EXPECT_EQ(*iterator, 'a' + 3);
+        iterator = -2 + iterator;
+        EXPECT_EQ(*iterator, 'a' + 1);
+    }
+    {
+        // -=
+        auto iterator = rb.end();
+        EXPECT_TRUE(iterator == (iterator -= 2));
+        EXPECT_EQ(*iterator, 'a' + 5);
+        iterator -= 3;
+        EXPECT_EQ(*iterator, 'a' + 2);
+        iterator -= 2;
+        EXPECT_EQ(iterator, rb.begin());
+    }
+    {
+        // - between an iterator and difference_type
+        auto iterator = rb.end();
+        iterator = iterator - 3;
+        EXPECT_EQ(*iterator, 'a' + 4);
+        iterator = iterator - 2;
+        EXPECT_EQ(*iterator, 'a' + 2);
+        iterator = iterator - 2;
+        EXPECT_EQ(iterator, rb.begin());
+    }
+    {
+        // - between two iterators
+        auto iterA = rb.end();
+        auto iterB = rb.end();
+        EXPECT_EQ(iterA - iterB, 0);
+
+        iterB = rb.begin();
+        EXPECT_EQ(iterA - iterB, 7);
+
+        iterA -= 3;
+        EXPECT_EQ(iterA - iterB, 4);
+
+        iterB += 2;
+        EXPECT_EQ(iterA - iterB, 2);
+    }
+    {
+        // []
+        auto iterator = rb.begin();
+
+        for(unsigned int i = 0; i < 7; ++i)
+        {
+            EXPECT_EQ(iterator[i], 'a' + i);
+        }
+
+        iterator += 2;
+
+        for(unsigned int i = 0; i < 5; ++i)
+        {
+            EXPECT_EQ(iterator[i], 'a' + i + 2);
+        }
+    }
+    {
+        // < > <= >=
+        auto iterA = rb.end();
+        auto iterB = rb.begin();
+
+        EXPECT_TRUE(iterB < iterA);
+        EXPECT_TRUE(iterA > iterB);
+        EXPECT_TRUE(iterB <= iterA);
+        EXPECT_TRUE(iterA >= iterB);
+
+        --iterA; // 6
+        EXPECT_TRUE(iterB < iterA);
+        EXPECT_TRUE(iterA > iterB);
+        EXPECT_TRUE(iterB <= iterA);
+        EXPECT_TRUE(iterA >= iterB);
+
+        iterB += 2; // 2
+        iterA -= 2; // 4
+        EXPECT_TRUE(iterB < iterA);
+        EXPECT_TRUE(iterA > iterB);
+        EXPECT_TRUE(iterB <= iterA);
+        EXPECT_TRUE(iterA >= iterB);
+
+        iterB += 2; // 4
+        EXPECT_FALSE(iterB < iterA);
+        EXPECT_FALSE(iterA > iterB);
+        EXPECT_TRUE(iterB <= iterA);
+        EXPECT_TRUE(iterA >= iterB);
+
+        iterB += 2; // 6
+        EXPECT_FALSE(iterB < iterA);
+        EXPECT_FALSE(iterA > iterB);
+        EXPECT_FALSE(iterB <= iterA);
+        EXPECT_FALSE(iterA >= iterB);
+
+        EXPECT_FALSE(iterB < iterB);
+        EXPECT_FALSE(iterB > iterB);
+        EXPECT_TRUE(iterB <= iterB);
+        EXPECT_TRUE(iterB >= iterB);
+    }
+}
+
+TEST(RingBuffer, IteratorMisc)
+{
+    RingBuffer<char> rb(10);
+
+    // empty, begin and end should be the same
+    EXPECT_EQ(rb.begin(), rb.end());
+
+    rb.push('a');
+    EXPECT_NE(rb.begin(), rb.end());
+}
+
