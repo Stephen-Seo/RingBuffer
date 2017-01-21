@@ -1182,6 +1182,30 @@ TEST(RingBuffer, IteratorMisc)
 
     rb.push('a');
     EXPECT_NE(rb.begin(), rb.end());
+
+    rb.pop();
+
+    for(unsigned int i = 0; i < 10; ++i)
+    {
+        rb.push('a' + i);
+    }
+
+    {
+        unsigned int i = 0;
+        for(auto& reference : rb)
+        {
+            EXPECT_EQ('a' + i, reference);
+            reference = 'A' + i;
+            ++i;
+        }
+
+        i = 0;
+        for(const auto& constRef : rb)
+        {
+            EXPECT_EQ('A' + i, constRef);
+            ++i;
+        }
+    }
 }
 
 TEST(RingBuffer, ChangeCapacity)
@@ -1230,6 +1254,21 @@ TEST(RingBuffer, ChangeCapacity)
     {
         EXPECT_EQ('a' + i, rb.at(i));
     }
+
+    rb.changeCapacity(0);
+    EXPECT_TRUE(rb.empty());
+    EXPECT_EQ(0, rb.getSize());
+
+    rb.changeCapacity(4);
+    EXPECT_TRUE(rb.empty());
+    EXPECT_EQ(0, rb.getSize());
+
+    for(unsigned int i = 0; i < 4; ++i)
+    {
+        rb.push('a' + i);
+    }
+    EXPECT_FALSE(rb.empty());
+    EXPECT_EQ(4, rb.getSize());
 }
 
 TEST(RingBuffer, ChangeSize)

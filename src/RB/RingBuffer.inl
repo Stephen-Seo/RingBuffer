@@ -159,6 +159,10 @@ void RB::RingBuffer<T>::changeCapacity(std::size_t newCapacity)
     }
     buffer = std::move(newBuffer);
     bufferSize = newCapacity;
+    if(newCapacity == 0)
+    {
+        isEmpty = true;
+    }
 }
 
 template <typename T>
