@@ -1206,6 +1206,20 @@ TEST(RingBuffer, IteratorMisc)
             ++i;
         }
     }
+
+    char a = rb.pop();
+    char b = rb.pop();
+
+    rb.push('A' + 10);
+    rb.push('A' + 11);
+
+    EXPECT_EQ(a, 'A');
+    EXPECT_EQ(b, 'B');
+
+    for(unsigned int i = 0; i < 10; ++i)
+    {
+        EXPECT_EQ(rb.at(i), 'A' + i + 2);
+    }
 }
 
 TEST(RingBuffer, ChangeCapacity)
