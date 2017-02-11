@@ -1207,8 +1207,10 @@ TEST(RingBuffer, IteratorMisc)
         }
     }
 
-    char a = rb.pop();
-    char b = rb.pop();
+    char a = rb.top();
+    rb.pop();
+    char b = rb.top();
+    rb.pop();
 
     rb.push('A' + 10);
     rb.push('A' + 11);

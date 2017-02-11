@@ -1,4 +1,9 @@
 
+# Version 1.3
+
+RingBuffer::pop() now returns void.
+RingBuffer::top() implemented, returns reference to top.
+
 # Version 1.2
 
 Fixed setting a non-empty RingBuffer to capacity size 0 not toggling 

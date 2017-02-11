@@ -32,7 +32,8 @@ public:
 
     void push(const T& reference);
     void push(T&& r_value);
-    T&& pop();
+    void pop();
+    T& top();
 
     T& operator [](std::size_t index);
     const T& operator [](std::size_t index) const;

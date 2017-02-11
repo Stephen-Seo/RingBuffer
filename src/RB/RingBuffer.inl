@@ -61,19 +61,22 @@ void RB::RingBuffer<T>::push(T&& r_value)
 }
 
 template <typename T>
-T&& RB::RingBuffer<T>::pop()
+void RB::RingBuffer<T>::pop()
 {
     checkPop();
 
-    T value = std::move(buffer[r]);
     r = (r + 1) % bufferSize;
 
     if(r == w)
     {
         isEmpty = true;
     }
+}
 
-    return std::move(value);
+template <typename T>
+T& RB::RingBuffer<T>::top()
+{
+    return buffer[r];
 }
 
 template <typename T>
