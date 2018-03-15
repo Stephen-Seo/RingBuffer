@@ -2,7 +2,7 @@
 #ifndef RING_BUFFER_HPP
 #define RING_BUFFER_HPP
 
-#define RING_BUFFER_DEFAULT_CAPACITY 1024
+#define RING_BUFFER_DEFAULT_CAPACITY 32
 
 #include <cstdlib>
 #include <cstddef>
