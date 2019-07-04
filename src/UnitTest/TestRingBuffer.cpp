@@ -1,4 +1,3 @@
-
 #include <stdexcept>
 
 #include "gtest/gtest.h"
@@ -1353,5 +1352,9 @@ TEST(RingBuffer, ChangeSize)
             EXPECT_EQ('z', rb.at(i));
         }
     }
-}
 
+    rb.changeSize(0, 'e');
+    EXPECT_EQ(0, rb.getSize());
+    EXPECT_TRUE(rb.empty());
+    EXPECT_EQ(10, rb.getCapacity());
+}

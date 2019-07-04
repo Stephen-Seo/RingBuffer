@@ -1,3 +1,7 @@
+# Version 1.4
+
+Changed default capacity to 32.
+Minor additions to UnitTests.
 
 # Version 1.3
 
