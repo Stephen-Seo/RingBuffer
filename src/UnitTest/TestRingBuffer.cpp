@@ -1358,3 +1358,106 @@ TEST(RingBuffer, ChangeSize)
     EXPECT_TRUE(rb.empty());
     EXPECT_EQ(10, rb.getCapacity());
 }
+
+TEST(RingBuffer, resizePolicy) {
+    {
+        // resize, front is preserved
+        RingBuffer<int> rb(5);
+        EXPECT_TRUE(rb.getResizePolicy());
+
+        rb.push(0);
+        rb.push(1);
+        rb.push(2);
+        rb.push(3);
+        rb.push(4);
+
+        rb.setResizePolicy(true);
+        rb.changeSize(2);
+        EXPECT_EQ(rb.top(), 0);
+        rb.pop();
+        EXPECT_EQ(rb.top(), 1);
+    }
+
+    {
+        // resize, back is preserved
+        RingBuffer<int> rb(5);
+        EXPECT_TRUE(rb.getResizePolicy());
+
+        rb.push(0);
+        rb.push(1);
+        rb.push(2);
+        rb.push(3);
+        rb.push(4);
+
+        rb.setResizePolicy(false);
+        EXPECT_FALSE(rb.getResizePolicy());
+        rb.changeSize(2);
+        EXPECT_EQ(rb.top(), 3);
+        rb.pop();
+        EXPECT_EQ(rb.top(), 4);
+    }
+
+    {
+        // change capacity, front is preserved
+        RingBuffer<int> rb(5);
+        EXPECT_TRUE(rb.getResizePolicy());
+
+        rb.push(0);
+        rb.push(1);
+        rb.push(2);
+        rb.push(3);
+        rb.push(4);
+
+        rb.setResizePolicy(true);
+        rb.changeCapacity(2);
+        EXPECT_EQ(rb.top(), 0);
+        rb.pop();
+        EXPECT_EQ(rb.top(), 1);
+    }
+
+    {
+        // change capacity, back is preserved
+        RingBuffer<int> rb(5);
+        EXPECT_TRUE(rb.getResizePolicy());
+
+        rb.push(0);
+        rb.push(1);
+        rb.push(2);
+        rb.push(3);
+        rb.push(4);
+
+        rb.setResizePolicy(false);
+        EXPECT_FALSE(rb.getResizePolicy());
+        rb.changeCapacity(2);
+        EXPECT_EQ(rb.top(), 3);
+        rb.pop();
+        EXPECT_EQ(rb.top(), 4);
+    }
+
+    {
+        RingBuffer<int> rb(5);
+
+        rb.push(0);
+        rb.push(1);
+        rb.push(2);
+        rb.push(3);
+        rb.push(4);
+
+        rb.resize(0);
+        EXPECT_TRUE(rb.empty());
+    }
+
+    {
+        RingBuffer<int> rb(5);
+
+        rb.push(0);
+        rb.push(1);
+        rb.push(2);
+        rb.push(3);
+        rb.push(4);
+
+        rb.setResizePolicy(false);
+        rb.resize(0);
+        EXPECT_TRUE(rb.empty());
+    }
+}

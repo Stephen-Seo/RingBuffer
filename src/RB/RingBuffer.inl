@@ -1,4 +1,3 @@
-
 #include <stdexcept>
 #include <limits>
 
@@ -6,7 +5,8 @@ template <typename T>
 RB::RingBuffer<T>::RingBuffer(std::size_t capacity) :
 r(0),
 w(0),
-isEmpty(true)
+isEmpty(true),
+resizePolicy_preserveFront(true)
 {
     if(capacity != 0)
     {
@@ -144,9 +144,16 @@ void RB::RingBuffer<T>::changeCapacity(std::size_t newCapacity)
     std::unique_ptr<T[]> newBuffer = std::make_unique<T[]>(newCapacity);
     if(!isEmpty)
     {
-        for(std::size_t i = 0; i < getSize() && i < newCapacity; ++i)
-        {
-            newBuffer[i] = buffer[(r + i) % bufferSize];
+        if(newCapacity < bufferSize && !resizePolicy_preserveFront) {
+            std::size_t diff = bufferSize - newCapacity;
+            for(std::size_t i = 0; i < getSize() && i < newCapacity; ++i) {
+                newBuffer[i] = buffer[(r + diff + i) % bufferSize];
+            }
+        } else {
+            for(std::size_t i = 0; i < getSize() && i < newCapacity; ++i)
+            {
+                newBuffer[i] = buffer[(r + i) % bufferSize];
+            }
         }
     }
 
@@ -191,19 +198,36 @@ void RB::RingBuffer<T>::changeSize(std::size_t newSize, const T& toCopy)
     std::size_t size = getSize();
     if(newSize < size)
     {
-        for(unsigned int i = 0; i < size - newSize; ++i)
-        {
-            if(w == 0)
+        if(newSize == 0) {
+            r = 0;
+            w = 0;
+            isEmpty = true;
+        } else if(resizePolicy_preserveFront) {
+            for(unsigned int i = 0; i < size - newSize; ++i)
             {
-                w = bufferSize - 1;
+                if(w == 0)
+                {
+                    w = bufferSize - 1;
+                }
+                else
+                {
+                    --w;
+                }
+                if(w == r)
+                {
+                    isEmpty = true;
+                }
             }
-            else
-            {
-                --w;
-            }
-            if(w == r)
-            {
-                isEmpty = true;
+        } else {
+            for(unsigned int i = 0; i < size - newSize; ++i) {
+                if(r + 1 >= bufferSize) {
+                    r = 0;
+                } else {
+                    ++r;
+                }
+                if(r == w) {
+                    isEmpty = true;
+                }
             }
         }
     }
@@ -231,6 +255,18 @@ template <typename T>
 void RB::RingBuffer<T>::resize(std::size_t newSize, const T& toCopy)
 {
     changeSize(newSize, toCopy);
+}
+
+template <typename T>
+bool RB::RingBuffer<T>::setResizePolicy(bool preserveFront) {
+    bool prev = resizePolicy_preserveFront;
+    resizePolicy_preserveFront = preserveFront;
+    return prev;
+}
+
+template <typename T>
+bool RB::RingBuffer<T>::getResizePolicy() const {
+    return resizePolicy_preserveFront;
 }
 
 template <typename T>
@@ -592,4 +628,3 @@ typename RB::RingBuffer<T>::template Iterator<true> RB::RingBuffer<T>::cend() co
 {
     return Iterator<true>(r, w, bufferSize, r, isEmpty, true, buffer.get());
 }
-

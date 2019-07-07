@@ -1,3 +1,13 @@
+# Version 1.5
+
+Add setResizePolicy/getResizePolicy functions that set a flag in the RingBuffer
+that determines if the front or back end of the buffer is truncated when the
+buffer is resized to a size smaller than the current size.
+
+Behavior of the RingBuffer before this version is preserved by defaulting to the
+previous behavior (which was always truncate the back end, preserving the front
+end).
+
 # Version 1.4
 
 Changed default capacity to 32.

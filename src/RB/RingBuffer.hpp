@@ -53,11 +53,26 @@ public:
     void resize(std::size_t newSize);
     void resize(std::size_t newSize, const T& toCopy);
 
+    /*!
+     * If set to true, resizing the RingBuffer to a size smaller than the
+     * current size will preserve the front end of the buffer and truncate the
+     * back end. If false, the back end of the buffer will be preserved and the
+     * front end of the buffer will be truncated.
+     *
+     * This affects changeSize/resize and changeCapacity.
+     *
+     * By default, the front is preserved (as if this function was called with
+     * "true").
+     */
+    bool setResizePolicy(bool preserveFront);
+    bool getResizePolicy() const;
+
 private:
     std::size_t r;
     std::size_t w;
     std::size_t bufferSize;
     bool isEmpty;
+    bool resizePolicy_preserveFront;
     std::unique_ptr<T[]> buffer;
 
     void checkPush() const;
