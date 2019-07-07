@@ -141,23 +141,23 @@ std::size_t RB::RingBuffer<T>::getSize() const
 template <typename T>
 void RB::RingBuffer<T>::changeCapacity(std::size_t newCapacity)
 {
+    const std::size_t size = getSize();
     std::unique_ptr<T[]> newBuffer = std::make_unique<T[]>(newCapacity);
     if(!isEmpty)
     {
-        if(newCapacity < bufferSize && !resizePolicy_preserveFront) {
-            std::size_t diff = bufferSize - newCapacity;
-            for(std::size_t i = 0; i < getSize() && i < newCapacity; ++i) {
+        if(newCapacity < size && !resizePolicy_preserveFront) {
+            std::size_t diff = size - newCapacity;
+            for(std::size_t i = 0; i < size && i < newCapacity; ++i) {
                 newBuffer[i] = buffer[(r + diff + i) % bufferSize];
             }
         } else {
-            for(std::size_t i = 0; i < getSize() && i < newCapacity; ++i)
+            for(std::size_t i = 0; i < size && i < newCapacity; ++i)
             {
                 newBuffer[i] = buffer[(r + i) % bufferSize];
             }
         }
     }
 
-    std::size_t size = getSize();
     r = 0;
     if(size < newCapacity)
     {

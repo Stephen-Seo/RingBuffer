@@ -1,3 +1,8 @@
+# Version 1.6
+
+Fix bug where changing to a smaller capacity with resizePolicy set to false
+would result in invalid entries in the buffer.
+
 # Version 1.5
 
 Add setResizePolicy/getResizePolicy functions that set a flag in the RingBuffer

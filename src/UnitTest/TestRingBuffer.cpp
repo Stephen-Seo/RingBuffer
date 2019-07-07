@@ -1460,4 +1460,132 @@ TEST(RingBuffer, resizePolicy) {
         rb.resize(0);
         EXPECT_TRUE(rb.empty());
     }
+
+    {
+        RingBuffer<int> rb(5);
+
+        rb.push(-1);
+        rb.push(-1);
+        rb.push(-1);
+
+        rb.push(0);
+        rb.push(1);
+        rb.pop();
+        rb.push(2);
+        rb.pop();
+        rb.push(3);
+        rb.pop();
+        rb.push(4);
+
+        rb.resize(2);
+        EXPECT_EQ(rb.top(), 0);
+        rb.pop();
+        EXPECT_EQ(rb.top(), 1);
+        rb.pop();
+        EXPECT_TRUE(rb.empty());
+    }
+
+    {
+        RingBuffer<int> rb(5);
+
+        rb.push(-1);
+        rb.push(-1);
+        rb.push(-1);
+
+        rb.push(0);
+        rb.push(1);
+        rb.pop();
+        rb.push(2);
+        rb.pop();
+        rb.push(3);
+        rb.pop();
+        rb.push(4);
+
+        rb.setResizePolicy(false);
+        rb.resize(2);
+        EXPECT_EQ(rb.top(), 3);
+        rb.pop();
+        EXPECT_EQ(rb.top(), 4);
+        rb.pop();
+        EXPECT_TRUE(rb.empty());
+    }
+
+    {
+        RingBuffer<int> rb(5);
+
+        rb.push(-1);
+        rb.push(-1);
+        rb.push(-1);
+
+        rb.push(0);
+        rb.push(1);
+        rb.pop();
+        rb.push(2);
+        rb.pop();
+        rb.push(3);
+        rb.pop();
+        rb.push(4);
+
+        rb.changeCapacity(2);
+        EXPECT_EQ(rb.top(), 0);
+        rb.pop();
+        EXPECT_EQ(rb.top(), 1);
+        rb.pop();
+        EXPECT_TRUE(rb.empty());
+    }
+
+    {
+        RingBuffer<int> rb(5);
+
+        rb.push(-1);
+        rb.push(-1);
+        rb.push(-1);
+
+        rb.push(0);
+        rb.push(1);
+        rb.pop();
+        rb.push(2);
+        rb.pop();
+        rb.push(3);
+        rb.pop();
+        rb.push(4);
+
+        rb.setResizePolicy(false);
+        rb.changeCapacity(2);
+        EXPECT_EQ(rb.top(), 3);
+        rb.pop();
+        EXPECT_EQ(rb.top(), 4);
+        rb.pop();
+        EXPECT_TRUE(rb.empty());
+    }
+
+    {
+        RingBuffer<int> rb(4);
+
+        rb.push(-1);
+        EXPECT_EQ(rb.top(), -1);
+
+        rb.push(0);
+        rb.push(1);
+        rb.push(2);
+        EXPECT_EQ(rb.top(), -1);
+
+        rb.pop();
+        EXPECT_EQ(rb.top(), 0);
+
+        rb.setResizePolicy(false);
+
+        rb.changeCapacity(8);
+        EXPECT_EQ(rb.top(), 0);
+
+        rb.push(3);
+        EXPECT_EQ(rb.top(), 0);
+        rb.pop();
+        EXPECT_EQ(rb.top(), 1);
+
+        rb.changeCapacity(1);
+        EXPECT_EQ(rb.top(), 3);
+        rb.pop();
+        EXPECT_TRUE(rb.empty());
+    }
 }
